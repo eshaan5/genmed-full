@@ -4,11 +4,11 @@ const scrapeMed = async (medName) => {
   function fetchNum(str) {
     let matches = str.match(/(\d+)/);
 
-    return matches[0];
+    return matches ? matches[0] : 0;
   }
 
-  const nameLink = "#maincontent > div.content-section > div.product-top > div.product-right-block > div.product-detail > h1";
-  const compositionLink = "#maincontent > div.content-section > div.product-top > div.product-right-block > div.product-detail > div.drug-manu > a";
+  const nameLink = "#maincontent > div.content-section > div.product-top > div.product-right-block > div.product-detail > div.prodName > h1";
+  const compositionLink = "#choose-generic-substitutes-block > div > div.info-con > a > div";
   const imageLink = "#slider > section > div.main-container > div > div > div > div.slick-slide.slick-current.slick-active > div > div > figure > img";
   const priceLink = "#maincontent > div.content-section > div.product-top > div.product-right-block > div.essentials > div.drug-con.pull-left.price-box > span.final-price";
   const packingLink = "#maincontent > div.content-section > div.product-top > div.product-right-block > div.essentials > div.drug-con.pull-left.price-box > span.drug-varient";
@@ -24,8 +24,10 @@ const scrapeMed = async (medName) => {
   await Promise.all([await page.keyboard.press("Enter"), await page.waitForNavigation()]);
 
   try {
-    
-    await page.click("#algolia_hits > li:nth-child(1) > div > div > div.drug_c > a > div")
+    await page.waitForSelector("#algolia_hits > div > div > ol > li:nth-child(1) > div > a.category_name");
+    await page.click("#algolia_hits > div > div > ol > li:nth-child(1) > div > a.category_name");
+
+    console.log("clicked on med");
 
     await page.waitForSelector(nameLink);
     const name = await page.$eval(nameLink, (el) => el.innerText);
@@ -43,7 +45,7 @@ const scrapeMed = async (medName) => {
     const packing = await page.$eval(packingLink, (el) => el.innerText);
 
     await browser.close();
-    console.log('Got the med');
+    console.log("Got the med");
     return { name, composition, image, price, status: true, url: page.url(), packing };
   } catch (err) {
     console.log(err);
